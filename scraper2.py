@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup as BS
 def main():
     url = arguments()[0]
     file = arguments()[1]
+    pprint(get_city_code_name(url))
 
 
 def get_city_links():
@@ -47,6 +48,22 @@ def arguments():
         file = sys.argv[2]
         print(f"Run the file {sys.argv[0]}.")
     return url, file
+
+
+def get_city_code_name(url):
+    request = requests.get(url)
+    soup = BS(request.text, "html.parser")
+    code_data = soup.find_all("td", {"class": "cislo"})
+    name_data = soup.find_all("td", {"class": "overflow_name"})
+    codes = []
+    names = []
+    for code in code_data:
+        code = code.find("a")
+        codes.append(code.text)
+
+    for name in name_data:
+        names.append(name.text)
+    return codes, names
 
 
 if __name__ == "__main__":
