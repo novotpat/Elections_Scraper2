@@ -19,7 +19,8 @@ def main():
     # pprint(get_city_code_name(url))
     # pprint(get_city_links(url))
     new_url = get_city_links(url)
-    pprint(check_every_links_data(new_url))
+    # pprint(check_every_links_data(new_url))
+    pprint(create_table_data(url, new_url))
 
 
 def get_district_links():
@@ -57,7 +58,7 @@ def get_city_code_name(url):
     request = requests.get(url)
     soup = BS(request.text, "html.parser")
     code_data = soup.find_all("td", {"class": "cislo"})
-    name_data = soup.find_all("td", {"class": "overflow_name"})
+    name_data = soup.find_all("td", {"headers": re.compile("t*sb2")})
     codes = []
     names = []
     for code in code_data:
@@ -65,7 +66,10 @@ def get_city_code_name(url):
         codes.append(code.text)
 
     for name in name_data:
-        names.append(name.text)
+        if name.text == "-":
+            continue
+        else:
+            names.append(name.text)
     return codes, names
 
 
@@ -73,7 +77,7 @@ def get_city_links(url):
     request = requests.get(url)
     soup = BS(request.text, "html.parser")
     city_data = soup.find_all("td", {"headers": re.compile("t*sb1")})
-    city_data = city_data[0:-2]
+    city_data = city_data[:-2]
     front_link = "https://volby.cz/pls/ps2017nss/"
     city_links = []
     for link in city_data:
@@ -88,17 +92,45 @@ def check_every_links_data(new_url):
     valid_votes_data = []
 
     candidate_parties = []
+    party_votes_data = []
 
     for link in new_url:
         new_request = requests.get(link)
         new_soup = BS(new_request.text, "html.parser")
         voters = new_soup.find("td", {"headers": "sa2"}).text
         issued_envelopes = new_soup.find("td", {"headers": "sa3"}).text
-        valid_votes = new_soup.find("td", {"headers": "sa6"})
-        voters_data.append(voters)
-        issued_envelopes_data.append(issued_envelopes)
-        valid_votes_data.append(valid_votes.text)
-    return valid_votes_data
+        valid_votes = new_soup.find("td", {"headers": "sa6"}).text
+        voters_data.append(voters.replace("\xa0", ""))
+        issued_envelopes_data.append(issued_envelopes.replace("\xa0", ""))
+        valid_votes_data.append(valid_votes.replace("\xa0", ""))
+
+    for party in new_soup.find_all("td", {"headers": re.compile("t*sb2")}):
+        if party.text.isnumeric():
+            continue
+        else:
+            candidate_parties.append(party.text)
+
+        for party_votes in new_soup.find_all("td", {"headers": re.compile("t*sb3")}):
+            if party_votes.text == "100,00":
+                continue
+            else:
+                party_votes_data.append(party_votes.text.replace("\xa0", ""))
+
+    return voters_data, issued_envelopes_data, valid_votes_data, candidate_parties, party_votes_data
+
+
+def create_table_data(url, new_url):
+    code = get_city_code_name(url)[0]
+    name = get_city_code_name(url)[1]
+    voters = check_every_links_data(new_url)[0]
+    envelopes = check_every_links_data(new_url)[1]
+    valid_votes = check_every_links_data(new_url)[2]
+    party_votes = check_every_links_data(new_url)[4]
+    table = []
+    for row in range(len(code)):
+        row = code[row], name[row], voters[row], envelopes[row], valid_votes[row]
+        table.append(row)
+    return table
 
 
 if __name__ == "__main__":
