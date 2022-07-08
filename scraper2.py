@@ -20,8 +20,10 @@ def main():
     # pprint(get_city_links(url))
     new_url = get_city_links(url)
     # pprint(check_every_links_data(new_url))
-    pprint(check_parties_votes(new_url))
+    # pprint(check_parties_votes(new_url))
     # pprint(create_table_data(url, new_url))
+    print(f"Save to file {file}.")
+    create_csv_file(url, new_url, file)
 
 
 def get_district_links():
@@ -122,16 +124,17 @@ def check_parties_votes(new_url):
         votes = new_soup.find_all("td", {"headers": re.compile("t*sb3")})
         parties_votes_data.append(votes)
 
-        """for i in range(len(parties_votes_data)):
-            parties_votes_data[i].append(votes)
-            if votes.text == "100,00":
-                continue
-            else:
-                parties_votes_data[i].append(votes.text.replace("\xa0", ""))"""
+    for i in range(len(parties_votes_data)):
+        for j in range(len(parties_votes_data[i])):
+            parties_votes_data[i][j] = parties_votes_data[i][j].text
+
+    for x in parties_votes_data:
+        del x[0]
+
     return parties_votes_data
 
 
-"""def create_table_data(url, new_url):
+def create_table_data(url, new_url):
     code = get_city_code_name(url)[0]
     name = get_city_code_name(url)[1]
     voters = check_every_links_data(new_url)[0]
@@ -141,9 +144,21 @@ def check_parties_votes(new_url):
 
     table = []
     for row in range(len(code)):
-        row = code[row], name[row], voters[row], envelopes[row], valid_votes[row]
+        row = code[row], name[row], voters[row], envelopes[row], valid_votes[row], party_votes[row]
         table.append(row)
-    return table"""
+    return table
+
+
+def create_csv_file(url, new_url, file):
+    parties = check_every_links_data(new_url)[3]
+    headline = ["CODE", "COMMUNITY", "VOTERS", "ISSUED ENVELOPES", "VALID VOTES", parties]
+    data = list(create_table_data(url, new_url))
+
+    create_file = open(file, "w", newline="")
+    writer = csv.writer(create_file)
+    writer.writerow(headline)
+    writer.writerows(data)
+    create_file.close()
 
 
 if __name__ == "__main__":
