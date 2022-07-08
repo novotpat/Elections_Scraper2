@@ -20,7 +20,8 @@ def main():
     # pprint(get_city_links(url))
     new_url = get_city_links(url)
     # pprint(check_every_links_data(new_url))
-    pprint(create_table_data(url, new_url))
+    pprint(check_parties_votes(new_url))
+    # pprint(create_table_data(url, new_url))
 
 
 def get_district_links():
@@ -92,7 +93,6 @@ def check_every_links_data(new_url):
     valid_votes_data = []
 
     candidate_parties = []
-    party_votes_data = []
 
     for link in new_url:
         new_request = requests.get(link)
@@ -110,27 +110,40 @@ def check_every_links_data(new_url):
         else:
             candidate_parties.append(party.text)
 
-        for party_votes in new_soup.find_all("td", {"headers": re.compile("t*sb3")}):
-            if party_votes.text == "100,00":
+    return voters_data, issued_envelopes_data, valid_votes_data, candidate_parties
+
+
+def check_parties_votes(new_url):
+    parties_votes_data = []
+
+    for link in new_url:
+        new_request = requests.get(link)
+        new_soup = BS(new_request.text, "html.parser")
+        votes = new_soup.find_all("td", {"headers": re.compile("t*sb3")})
+        parties_votes_data.append(votes)
+
+        """for i in range(len(parties_votes_data)):
+            parties_votes_data[i].append(votes)
+            if votes.text == "100,00":
                 continue
             else:
-                party_votes_data.append(party_votes.text.replace("\xa0", ""))
+                parties_votes_data[i].append(votes.text.replace("\xa0", ""))"""
+    return parties_votes_data
 
-    return voters_data, issued_envelopes_data, valid_votes_data, candidate_parties, party_votes_data
 
-
-def create_table_data(url, new_url):
+"""def create_table_data(url, new_url):
     code = get_city_code_name(url)[0]
     name = get_city_code_name(url)[1]
     voters = check_every_links_data(new_url)[0]
     envelopes = check_every_links_data(new_url)[1]
     valid_votes = check_every_links_data(new_url)[2]
-    party_votes = check_every_links_data(new_url)[4]
+    party_votes = check_parties_votes(new_url)
+
     table = []
     for row in range(len(code)):
         row = code[row], name[row], voters[row], envelopes[row], valid_votes[row]
         table.append(row)
-    return table
+    return table"""
 
 
 if __name__ == "__main__":
