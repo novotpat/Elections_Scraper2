@@ -22,8 +22,8 @@ def main():
     # pprint(check_every_links_data(new_url))
     # pprint(check_parties_votes(new_url))
     # pprint(create_table_data(url, new_url))
-    print(f"Save to file {file}.")
     create_csv_file(url, new_url, file)
+    print(f"Save to file {file}.")
 
 
 def get_district_links():
@@ -39,15 +39,13 @@ def get_district_links():
     return district_links
 
 
-# pprint(get_district_links())
-
-
 def arguments():
     if len(sys.argv) != 3:
         print(f"The script {sys.argv[0]} needs input two arguments.")
         quit()
-    elif sys.argv[1] not in get_district_links() or not sys.argv[2].endswith(".csv"):
+    elif sys.argv[1] not in get_district_links():
         print("The first argument must be URL of the scraping city in quotes.")
+    elif not sys.argv[2].endswith("csv"):
         print("The second argument must be the file name.")
         quit()
     else:
@@ -79,8 +77,7 @@ def get_city_code_name(url):
 def get_city_links(url):
     request = requests.get(url)
     soup = BS(request.text, "html.parser")
-    city_data = soup.find_all("td", {"headers": re.compile("t*sb1")})
-    city_data = city_data[:-2]
+    city_data = soup.find_all("td", {"class": "cislo"})
     front_link = "https://volby.cz/pls/ps2017nss/"
     city_links = []
     for link in city_data:
@@ -143,16 +140,23 @@ def create_table_data(url, new_url):
     party_votes = check_parties_votes(new_url)
 
     table = []
-    for row in range(len(code)):
-        row = code[row], name[row], voters[row], envelopes[row], valid_votes[row], party_votes[row]
+    for x in range(len(code)):
+        row = [code[x], name[x], voters[x], envelopes[x], valid_votes[x]]
+
+        for y in range(len(party_votes[x])):
+            row.append(party_votes[x][y])
         table.append(row)
+
     return table
 
 
 def create_csv_file(url, new_url, file):
-    parties = check_every_links_data(new_url)[3]
-    headline = ["CODE", "COMMUNITY", "VOTERS", "ISSUED ENVELOPES", "VALID VOTES", parties]
-    data = list(create_table_data(url, new_url))
+    headline = ["Kód obce", "Název obce", "Voliči v seznamu", "Vydané obálky", "Platné hlasy"]
+
+    for parties in check_every_links_data(new_url)[3]:
+        headline.append(parties)
+
+    data = create_table_data(url, new_url)
 
     create_file = open(file, "w", newline="")
     writer = csv.writer(create_file)
