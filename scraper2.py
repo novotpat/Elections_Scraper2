@@ -24,6 +24,7 @@ def main():
     # pprint(create_table_data(url, new_url))
     create_csv_file(url, new_url, file)
     print(f"Save to file {file}.")
+    print(f"Termination the election-scraper.")
 
 
 def get_district_links():
