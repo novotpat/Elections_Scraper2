@@ -38,6 +38,4 @@ Kód obce,Název obce,Voliči v seznamu,Vydané obálky,Platné hlasy,Občanská
 574724,Barchov,170,113,113,5,0,0,9,0,12,7,0,3,1,0,0,14,0,3,40,0,1,3,0,0,0,15,0
 574741,Bezděkov,262,164,163,18,0,0,5,0,14,9,7,1,2,0,0,20,0,7,58,0,1,3,4,2,0,11,1
 574783,Borek,226,161,159,30,0,1,12,1,12,9,2,1,3,2,0,11,0,6,34,0,0,8,1,0,1,25,0
-![image](https://user-images.githubusercontent.com/71101156/178426390-fe9e47bc-8c95-4a4e-908a-bd194bed8ed9.png)
-
 ```
