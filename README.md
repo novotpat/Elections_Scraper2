@@ -29,7 +29,7 @@ Spuštění programu:
 Průběh stahování:
 ```
 Run the file scraper2.py.
-Save to file vysledky_Pardubice2.csv.
+Save to file vysledky_Pardubice.csv.
 Termination the election-scraper.
 ```
 Částečný výstup:
